@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 function formatTime(seconds) {
   const s = Math.max(0, seconds)
@@ -8,8 +8,10 @@ function formatTime(seconds) {
   return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}.${ms}`
 }
 
-export function SubtitleList({ segments, activeId, defaultVerticalPosition, onSegmentChange }) {
+export function SubtitleList({ segments, activeId, defaultVerticalPosition, onSegmentChange, onSegmentSplit }) {
   const activeRef = useRef(null)
+  // Track cursor position per segment id
+  const [cursors, setCursors] = useState({})
 
   useEffect(() => {
     if (activeRef.current) {
@@ -23,6 +25,15 @@ export function SubtitleList({ segments, activeId, defaultVerticalPosition, onSe
         No subtitles found
       </div>
     )
+  }
+
+  function handleSplit(seg) {
+    const cursor = cursors[seg.id] ?? Math.floor(seg.text.length / 2)
+    const textA = seg.text.slice(0, cursor).trim()
+    const textB = seg.text.slice(cursor).trim()
+    if (!textA || !textB) return
+    const mid = seg.start + (seg.end - seg.start) / 2
+    onSegmentSplit(seg.id, textA, textB, mid)
   }
 
   return (
@@ -46,32 +57,44 @@ export function SubtitleList({ segments, activeId, defaultVerticalPosition, onSe
               onChange={(e) =>
                 onSegmentChange(seg.id, { ...seg, text: e.target.value })
               }
+              onSelect={(e) =>
+                setCursors((prev) => ({ ...prev, [seg.id]: e.target.selectionStart }))
+              }
               onClick={(e) => e.stopPropagation()}
             />
-            <div className="seg-position-row">
-              <label>Position</label>
-              <input
-                type="range"
-                min={5}
-                max={95}
-                value={pos}
-                onChange={(e) =>
-                  onSegmentChange(seg.id, { ...seg, verticalPosition: Number(e.target.value) })
-                }
-              />
-              <span className="value-label">{pos}%</span>
-              {hasCustomPos && (
-                <button
-                  className="reset-pos-btn"
-                  title="Reset to default"
-                  onClick={() => {
-                    const { verticalPosition: _, ...rest } = seg
-                    onSegmentChange(seg.id, rest)
-                  }}
-                >
-                  ↺
-                </button>
-              )}
+            <div className="seg-actions-row">
+              <div className="seg-position-row">
+                <label>Position</label>
+                <input
+                  type="range"
+                  min={5}
+                  max={95}
+                  value={pos}
+                  onChange={(e) =>
+                    onSegmentChange(seg.id, { ...seg, verticalPosition: Number(e.target.value) })
+                  }
+                />
+                <span className="value-label">{pos}%</span>
+                {hasCustomPos && (
+                  <button
+                    className="reset-pos-btn"
+                    title="Reset to default"
+                    onClick={() => {
+                      const { verticalPosition: _, ...rest } = seg
+                      onSegmentChange(seg.id, rest)
+                    }}
+                  >
+                    ↺
+                  </button>
+                )}
+              </div>
+              <button
+                className="split-btn"
+                title="Split at cursor position"
+                onClick={() => handleSplit(seg)}
+              >
+                Split
+              </button>
             </div>
           </div>
         )

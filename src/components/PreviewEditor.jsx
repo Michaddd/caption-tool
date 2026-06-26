@@ -37,6 +37,19 @@ export function PreviewEditor({ videoFile, segments, setSegments, style, setStyl
     setSegments((prev) => prev.map((s) => (s.id === id ? updated : s)))
   }
 
+  function handleSegmentSplit(id, textA, textB, midTime) {
+    setSegments((prev) => {
+      const idx = prev.findIndex((s) => s.id === id)
+      if (idx === -1) return prev
+      const orig = prev[idx]
+      const segA = { ...orig, text: textA, end: midTime }
+      const segB = { ...orig, text: textB, start: midTime, id: Date.now() }
+      const next = [...prev.slice(0, idx), segA, segB, ...prev.slice(idx + 1)]
+      // Re-assign sequential ids
+      return next.map((s, i) => ({ ...s, id: i }))
+    })
+  }
+
   async function handleExport() {
     setExportError(null)
     setExporting(true)
@@ -129,6 +142,7 @@ export function PreviewEditor({ videoFile, segments, setSegments, style, setStyl
               activeId={activeSeg?.id}
               defaultVerticalPosition={style.verticalPosition}
               onSegmentChange={handleSegmentChange}
+              onSegmentSplit={handleSegmentSplit}
             />
           ) : (
             <StyleControls style={style} onChange={setStyle} />

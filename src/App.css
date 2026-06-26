@@ -431,6 +431,37 @@ html, body, #root {
   cursor: text;
 }
 
+/* ── Per-segment actions row ─────────────────────────── */
+.seg-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.seg-actions-row .seg-position-row {
+  flex: 1;
+  margin-top: 0;
+}
+
+.split-btn {
+  background: none;
+  border: 1px solid var(--panel-border);
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 4px 10px;
+  min-height: 32px;
+  flex-shrink: 0;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.split-btn:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
 /* ── Per-segment position row ─────────────────────────── */
 .seg-position-row {
   display: flex;
