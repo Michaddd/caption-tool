@@ -21,7 +21,8 @@ export async function transcribeAudio(audioData, mimeType, apiKey) {
   const base64Audio = uint8ArrayToBase64(audioData)
 
   const prompt =
-    'Transcribe this audio. Return ONLY a JSON array of subtitle segments, ' +
+    'Transcribe this audio in its original language (do not translate). ' +
+    'Return ONLY a JSON array of subtitle segments, ' +
     'each with: text (string), start (number, seconds), end (number, seconds). ' +
     'No markdown, no explanation, just the JSON array.'
 

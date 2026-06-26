@@ -84,6 +84,7 @@ export function PreviewEditor({ videoFile, segments, setSegments, style, setStyl
             >
               <span
                 className="subtitle-text"
+                dir="auto"
                 style={{
                   fontSize: subtitleCSS.fontSize,
                   color: subtitleCSS.color,
