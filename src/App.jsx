@@ -104,9 +104,6 @@ export default function App() {
     <div className="app">
       <header className="app-header">
         <h1>Caption Tool</h1>
-        <button className="icon-btn" onClick={() => setShowApiModal(true)}>
-          ⚙ API Key
-        </button>
       </header>
 
       {step === STEPS.UPLOAD && (
