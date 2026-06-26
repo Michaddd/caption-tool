@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import { SubtitleList } from './SubtitleList.jsx'
 import { StyleControls } from './StyleControls.jsx'
 import { styleToCSS } from '../utils/subtitleStyle.js'
-import { generateSRT } from '../utils/srt.js'
 import { burnSubtitles } from '../utils/ffmpeg.js'
 
 export function PreviewEditor({ videoFile, segments, setSegments, style, setStyle, onReset }) {
@@ -56,8 +55,7 @@ export function PreviewEditor({ videoFile, segments, setSegments, style, setStyl
     setExportProgress(0)
 
     try {
-      const srtContent = generateSRT(segments)
-      const blob = await burnSubtitles(videoFile, srtContent, style, (p) => {
+      const blob = await burnSubtitles(videoFile, segments, style, (p) => {
         setExportProgress(p)
       })
 

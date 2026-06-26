@@ -26,19 +26,18 @@ async function ensureFont(ffmpeg) {
   if (fontLoaded) return
   try {
     const fontResp = await fetch('/fonts/NotoSansHebrew.ttf')
+    if (!fontResp.ok) throw new Error(`HTTP ${fontResp.status}`)
     const fontData = await fontResp.arrayBuffer()
+    await ffmpeg.createDir('/fonts')
     await ffmpeg.writeFile('/fonts/NotoSansHebrew.ttf', new Uint8Array(fontData))
     fontLoaded = true
   } catch (e) {
-    console.warn('Could not load Hebrew font, subtitles may not render correctly:', e)
+    console.warn('Could not load Hebrew font:', e)
   }
 }
 
 /**
  * Extract audio from a video File as a Uint8Array (mp3).
- * @param {File} videoFile
- * @param {(msg: string) => void} onProgress
- * @returns {{ data: Uint8Array, mimeType: string }}
  */
 export async function extractAudio(videoFile, onProgress) {
   const ffmpeg = await getFFmpeg()
@@ -62,22 +61,21 @@ export async function extractAudio(videoFile, onProgress) {
 
   const data = await ffmpeg.readFile(outputName)
 
-  // Clean up
-  await ffmpeg.deleteFile(inputName)
-  await ffmpeg.deleteFile(outputName)
+  try { await ffmpeg.deleteFile(inputName) } catch {}
+  try { await ffmpeg.deleteFile(outputName) } catch {}
 
   return { data, mimeType: 'audio/mp3' }
 }
 
 /**
- * Burn subtitles into video and return a Blob.
+ * Burn subtitles into video using drawtext filter.
  * @param {File} videoFile
- * @param {string} srtContent
- * @param {object} style - subtitle style options
- * @param {(progress: number) => void} onProgress - 0..1
+ * @param {Array} segments - subtitle segments with text, start, end, verticalPosition?
+ * @param {object} style
+ * @param {(progress: number) => void} onProgress
  * @returns {Blob}
  */
-export async function burnSubtitles(videoFile, srtContent, style, onProgress) {
+export async function burnSubtitles(videoFile, segments, style, onProgress) {
   const ffmpeg = await getFFmpeg()
   await ensureFont(ffmpeg)
 
@@ -88,16 +86,14 @@ export async function burnSubtitles(videoFile, srtContent, style, onProgress) {
 
   const inputName = 'input' + getExtension(videoFile.name)
   const outputName = 'output.mp4'
-  const srtName = '/subs.srt'
 
   await ffmpeg.writeFile(inputName, await fetchFile(videoFile))
-  await ffmpeg.writeFile(srtName, new TextEncoder().encode(srtContent))
 
-  const forceStyle = buildForceStyle(style)
+  const vf = buildDrawtextFilter(segments, style)
 
   await ffmpeg.exec([
     '-i', inputName,
-    '-vf', `subtitles=${srtName}:fontsdir=/fonts:force_style='${forceStyle}'`,
+    '-vf', vf,
     '-c:a', 'copy',
     '-c:v', 'libx264',
     '-preset', 'ultrafast',
@@ -107,71 +103,57 @@ export async function burnSubtitles(videoFile, srtContent, style, onProgress) {
 
   const data = await ffmpeg.readFile(outputName)
 
-  // Clean up
   try { await ffmpeg.deleteFile(inputName) } catch {}
   try { await ffmpeg.deleteFile(outputName) } catch {}
-  try { await ffmpeg.deleteFile(srtName) } catch {}
 
+  ffmpeg.off('log')
   ffmpeg.off('progress')
 
   return new Blob([data.buffer], { type: 'video/mp4' })
 }
 
+function buildDrawtextFilter(segments, style) {
+  const {
+    fontSize = 18,
+    textColor = '#ffffff',
+    bold = true,
+    shadow = true,
+    verticalPosition = 25,
+  } = style
+
+  const fontFile = fontLoaded ? '/fonts/NotoSansHebrew.ttf' : ''
+  const color = textColor.replace('#', '0x')
+  const shadowPart = shadow ? ':shadowx=2:shadowy=2:shadowcolor=0x000000@0.8' : ''
+
+  return segments.map((seg) => {
+    const pos = (seg.verticalPosition ?? verticalPosition) / 100
+    const text = escapeDrawtext(seg.text)
+    const fontPart = fontFile ? `fontfile=${fontFile}:` : ''
+
+    return (
+      `drawtext=${fontPart}` +
+      `text='${text}':` +
+      `enable='between(t,${seg.start},${seg.end})':` +
+      `x=(w-text_w)/2:` +
+      `y=h*${pos.toFixed(3)}-text_h/2:` +
+      `fontsize=${fontSize}:` +
+      `fontcolor=${color}` +
+      shadowPart
+    )
+  }).join(',')
+}
+
+function escapeDrawtext(text) {
+  return text
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\u2019") // replace apostrophe with right single quote to avoid escaping issues
+    .replace(/:/g, '\\:')
+    .replace(/%/g, '%%')
+    .replace(/[\r\n]+/g, ' ')
+    .trim()
+}
+
 function getExtension(filename) {
   const parts = filename.split('.')
   return parts.length > 1 ? '.' + parts[parts.length - 1] : '.mp4'
-}
-
-function buildForceStyle(style) {
-  const {
-    fontSize = 24,
-    textColor = '#ffffff',
-    bgColor = '#000000',
-    bgOpacity = 0.5,
-    bold = false,
-    shadow = true,
-    verticalPosition = 80,
-  } = style
-
-  const primaryColour = hexToASS(textColor, 0)
-  const backColour = hexToASS(bgColor, bgOpacity)
-  const borderStyle = bgOpacity > 0.01 ? 4 : 1
-  const outline = shadow ? 1 : 0
-  const shadowVal = shadow ? 1 : 0
-  const boldVal = bold ? 1 : 0
-
-  // Alignment: 2 = bottom center; MarginV controls distance from bottom
-  // We map verticalPosition (10-90 % from top) to MarginV
-  // verticalPosition 80 = near bottom, so MarginV is small
-  // We convert: marginV = (100 - verticalPosition) as a percentage of height
-  // In ASS/force_style we express as pixel offset from bottom (rough approximation)
-  const marginV = Math.round((100 - verticalPosition) * 3)
-
-  return [
-    `FontName=NotoSansHebrew`,
-    `FontSize=${fontSize}`,
-    `Bold=${boldVal}`,
-    `PrimaryColour=${primaryColour}`,
-    `BackColour=${backColour}`,
-    `BorderStyle=${borderStyle}`,
-    `Outline=${outline}`,
-    `Shadow=${shadowVal}`,
-    `Alignment=2`,
-    `MarginV=${marginV}`,
-  ].join(',')
-}
-
-/**
- * Convert hex color + opacity to ASS color format: &HAABBGGRR
- * opacity 0 = fully opaque, 1 = fully transparent (ASS convention)
- */
-function hexToASS(hex, opacity) {
-  const clean = hex.replace('#', '')
-  const r = parseInt(clean.substring(0, 2), 16)
-  const g = parseInt(clean.substring(2, 4), 16)
-  const b = parseInt(clean.substring(4, 6), 16)
-  // ASS alpha: 0x00 = opaque, 0xFF = transparent
-  const alpha = Math.round((1 - opacity) * 255)
-  const toHex2 = (n) => n.toString(16).padStart(2, '0').toUpperCase()
-  return `&H${toHex2(alpha)}${toHex2(b)}${toHex2(g)}${toHex2(r)}`
 }
