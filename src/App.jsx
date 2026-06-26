@@ -4,7 +4,7 @@ import { UploadZone } from './components/UploadZone.jsx'
 import { ProcessingScreen } from './components/ProcessingScreen.jsx'
 import { PreviewEditor } from './components/PreviewEditor.jsx'
 import { extractAudio } from './utils/ffmpeg.js'
-import { transcribeAudio } from './utils/gemini.js'
+import { transcribeAudio } from './utils/transcribe.js'
 
 const STEPS = {
   UPLOAD: 'upload',
@@ -61,7 +61,7 @@ export default function App() {
       )
 
       // Step 2: transcribe
-      setProcessingStatus('Transcribing with Gemini...')
+      setProcessingStatus('Transcribing...')
       const segs = await transcribeAudio(audioData, mimeType, apiKey)
 
       setSegments(segs)

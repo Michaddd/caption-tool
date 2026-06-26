@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-const STORAGE_KEY = 'gemini_api_key'
+const STORAGE_KEY = 'groq_api_key'
 
 export function ApiKeyModal({ onClose, onSave }) {
   const [key, setKey] = useState(() => localStorage.getItem(STORAGE_KEY) || '')
@@ -65,5 +65,5 @@ export function ApiKeyModal({ onClose, onSave }) {
 }
 
 export function getStoredApiKey() {
-  return localStorage.getItem(STORAGE_KEY) || import.meta.env.VITE_GEMINI_API_KEY || ''
+  return localStorage.getItem(STORAGE_KEY) || import.meta.env.VITE_GROQ_API_KEY || ''
 }
