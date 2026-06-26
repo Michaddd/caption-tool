@@ -4,7 +4,7 @@ export function ProcessingScreen({ status, error, onRetry, onBack }) {
       <div className="processing-screen">
         <div className="error-box">
           <p>{error}</p>
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+          <div className="error-box-actions">
             {onRetry && (
               <button className="btn btn-primary" onClick={onRetry}>
                 Try Again
