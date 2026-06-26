@@ -428,6 +428,44 @@ html, body, #root {
   cursor: text;
 }
 
+/* Per-segment position row */
+.seg-position-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.seg-position-row label {
+  font-size: 11px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  min-width: 48px;
+}
+
+.seg-position-row input[type="range"] {
+  flex: 1;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.reset-pos-btn {
+  background: none;
+  border: 1px solid var(--panel-border);
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 1px 6px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.reset-pos-btn:hover {
+  color: var(--text);
+  border-color: #444;
+}
+
 /* Style controls */
 .style-section {
   margin-bottom: 20px;

@@ -82,7 +82,10 @@ export function PreviewEditor({ videoFile, segments, setSegments, style, setStyl
           {activeSeg && (
             <div
               className="subtitle-overlay"
-              style={{ top: subtitleCSS.top, transform: subtitleCSS.transform }}
+              style={{
+                top: `${activeSeg.verticalPosition ?? style.verticalPosition}%`,
+                transform: subtitleCSS.transform,
+              }}
             >
               <span
                 className="subtitle-text"
@@ -124,6 +127,7 @@ export function PreviewEditor({ videoFile, segments, setSegments, style, setStyl
             <SubtitleList
               segments={segments}
               activeId={activeSeg?.id}
+              defaultVerticalPosition={style.verticalPosition}
               onSegmentChange={handleSegmentChange}
             />
           ) : (
