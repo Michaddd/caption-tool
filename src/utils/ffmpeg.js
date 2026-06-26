@@ -134,7 +134,7 @@ function buildDrawtextFilter(segments, style) {
 
   return segments.map((seg) => {
     const pos = (seg.verticalPosition ?? verticalPosition) / 100
-    const text = escapeDrawtext(seg.text)
+    const text = escapeDrawtext(toVisualOrder(seg.text))
     const fontPart = fontFile ? `fontfile=${fontFile}:` : ''
 
     return (
@@ -149,6 +149,16 @@ function buildDrawtextFilter(segments, style) {
       shadowPart
     )
   }).join(',')
+}
+
+/**
+ * Convert Hebrew (RTL) text from logical order to visual order so that
+ * drawtext (which always renders LTR) produces correct RTL output.
+ * For pure Hebrew captions this is equivalent to reversing the string.
+ */
+function toVisualOrder(text) {
+  if (!/[\u0590-\u05FF]/.test(text)) return text
+  return [...text].reverse().join('')
 }
 
 function escapeDrawtext(text) {
