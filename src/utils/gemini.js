@@ -8,9 +8,11 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
  * @returns {Array<{ text: string, start: number, end: number }>}
  */
 export async function transcribeAudio(audioData, mimeType, apiKey) {
-  if (!apiKey) {
+  const resolvedKey = apiKey || import.meta.env.VITE_GEMINI_API_KEY
+  if (!resolvedKey) {
     throw new Error('Gemini API key is required')
   }
+  apiKey = resolvedKey
 
   const genAI = new GoogleGenerativeAI(apiKey)
   const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })

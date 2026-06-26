@@ -65,5 +65,5 @@ export function ApiKeyModal({ onClose, onSave }) {
 }
 
 export function getStoredApiKey() {
-  return localStorage.getItem(STORAGE_KEY) || ''
+  return localStorage.getItem(STORAGE_KEY) || import.meta.env.VITE_GEMINI_API_KEY || ''
 }
