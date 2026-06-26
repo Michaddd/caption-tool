@@ -81,6 +81,7 @@ export async function burnSubtitles(videoFile, srtContent, style, onProgress) {
   const ffmpeg = await getFFmpeg()
   await ensureFont(ffmpeg)
 
+  ffmpeg.on('log', ({ message }) => console.log('[FFmpeg]', message))
   ffmpeg.on('progress', ({ progress }) => {
     if (onProgress) onProgress(Math.min(progress, 1))
   })
