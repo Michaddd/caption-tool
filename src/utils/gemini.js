@@ -15,7 +15,7 @@ export async function transcribeAudio(audioData, mimeType, apiKey) {
   apiKey = resolvedKey
 
   const genAI = new GoogleGenerativeAI(apiKey)
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
 
   // Convert Uint8Array to base64
   const base64Audio = uint8ArrayToBase64(audioData)
