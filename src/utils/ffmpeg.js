@@ -72,7 +72,7 @@ export async function burnSubtitles(videoFile, srtContent, style, onProgress) {
 
   const inputName = 'input' + getExtension(videoFile.name)
   const outputName = 'output.mp4'
-  const srtName = 'subs.srt'
+  const srtName = '/subs.srt'
 
   await ffmpeg.writeFile(inputName, await fetchFile(videoFile))
   await ffmpeg.writeFile(srtName, new TextEncoder().encode(srtContent))
@@ -84,7 +84,7 @@ export async function burnSubtitles(videoFile, srtContent, style, onProgress) {
     '-vf', `subtitles=${srtName}:force_style='${forceStyle}'`,
     '-c:a', 'copy',
     '-c:v', 'libx264',
-    '-preset', 'fast',
+    '-preset', 'ultrafast',
     '-crf', '23',
     outputName,
   ])
@@ -92,9 +92,9 @@ export async function burnSubtitles(videoFile, srtContent, style, onProgress) {
   const data = await ffmpeg.readFile(outputName)
 
   // Clean up
-  await ffmpeg.deleteFile(inputName)
-  await ffmpeg.deleteFile(outputName)
-  await ffmpeg.deleteFile(srtName)
+  try { await ffmpeg.deleteFile(inputName) } catch {}
+  try { await ffmpeg.deleteFile(outputName) } catch {}
+  try { await ffmpeg.deleteFile(srtName) } catch {}
 
   ffmpeg.off('progress')
 
