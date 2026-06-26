@@ -61,7 +61,7 @@ export default function App() {
       )
 
       // Step 2: transcribe
-      setProcessingStatus('Transcribing...')
+      setProcessingStatus('Transcribing and translating to Hebrew...')
       const segs = await transcribeAudio(audioData, mimeType, apiKey)
 
       setSegments(segs)
