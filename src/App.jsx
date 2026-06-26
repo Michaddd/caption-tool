@@ -12,11 +12,11 @@ const STEPS = {
 }
 
 const DEFAULT_STYLE = {
-  fontSize: 24,
+  fontSize: 36,
   textColor: '#ffffff',
   bgColor: '#000000',
   bgOpacity: 0,
-  bold: false,
+  bold: true,
   shadow: true,
   verticalPosition: 25,
 }
