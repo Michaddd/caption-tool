@@ -71,11 +71,13 @@ export function PreviewEditor({ videoFile, segments, setSegments, style, setStyl
       <div className="preview-pane">
         <div className="video-wrapper">
           <video
+            key={videoUrl}
             ref={videoRef}
             src={videoUrl}
             controls
             onTimeUpdate={handleTimeUpdate}
             playsInline
+            preload="auto"
           />
           {activeSeg && (
             <div
