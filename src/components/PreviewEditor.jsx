@@ -7,7 +7,7 @@ import { burnSubtitles } from '../utils/ffmpeg.js'
 
 export function PreviewEditor({ videoFile, segments, setSegments, style, setStyle, onReset }) {
   const videoRef = useRef(null)
-  const videoUrlRef = useRef(null)
+  const [videoUrl, setVideoUrl] = useState(null)
   const [currentTime, setCurrentTime] = useState(0)
   const [activeTab, setActiveTab] = useState('subtitles')
   const [exporting, setExporting] = useState(false)
@@ -18,7 +18,7 @@ export function PreviewEditor({ videoFile, segments, setSegments, style, setStyl
   useEffect(() => {
     if (!videoFile) return
     const url = URL.createObjectURL(videoFile)
-    videoUrlRef.current = url
+    setVideoUrl(url)
     return () => URL.revokeObjectURL(url)
   }, [videoFile])
 
@@ -72,7 +72,7 @@ export function PreviewEditor({ videoFile, segments, setSegments, style, setStyl
         <div className="video-wrapper">
           <video
             ref={videoRef}
-            src={videoUrlRef.current}
+            src={videoUrl}
             controls
             onTimeUpdate={handleTimeUpdate}
             playsInline
