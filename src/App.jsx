@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { ApiKeyModal, getStoredApiKey } from './components/ApiKeyModal.jsx'
 import { UploadZone } from './components/UploadZone.jsx'
 import { ProcessingScreen } from './components/ProcessingScreen.jsx'
 import { PreviewEditor } from './components/PreviewEditor.jsx'
@@ -24,45 +23,31 @@ const DEFAULT_STYLE = {
 
 export default function App() {
   const [step, setStep] = useState(STEPS.UPLOAD)
-  const [showApiModal, setShowApiModal] = useState(false)
   const [videoFile, setVideoFile] = useState(null)
   const [segments, setSegments] = useState([])
   const [style, setStyle] = useState(DEFAULT_STYLE)
   const [processingStatus, setProcessingStatus] = useState('')
   const [processingError, setProcessingError] = useState(null)
 
-  function handleApiKeySave(key) {
-    // key is saved to localStorage in the modal — nothing else needed here
-  }
-
   async function handleFileSelected(file) {
-    const apiKey = getStoredApiKey()
-    if (!apiKey) {
-      // Prompt for key first, then re-trigger after save
-      setVideoFile(file)
-      setShowApiModal(true)
-      return
-    }
-    await processVideo(file, apiKey)
+    await processVideo(file)
   }
 
-  async function processVideo(file, apiKey) {
+  async function processVideo(file) {
     setVideoFile(file)
     setStep(STEPS.PROCESSING)
     setProcessingError(null)
     setProcessingStatus('Initializing...')
 
     try {
-      // Step 1: extract audio
       setProcessingStatus('Extracting audio...')
       const { data: audioData, mimeType } = await extractAudio(
         file,
         (msg) => setProcessingStatus(msg)
       )
 
-      // Step 2: transcribe
       setProcessingStatus('Transcribing and translating to Hebrew...')
-      const segs = await transcribeAudio(audioData, mimeType, apiKey)
+      const segs = await transcribeAudio(audioData, mimeType, null)
 
       setSegments(segs)
       setStep(STEPS.EDITOR)
@@ -73,14 +58,7 @@ export default function App() {
   }
 
   function handleRetry() {
-    if (videoFile) {
-      const apiKey = getStoredApiKey()
-      if (!apiKey) {
-        setShowApiModal(true)
-        return
-      }
-      processVideo(videoFile, apiKey)
-    }
+    if (videoFile) processVideo(videoFile)
   }
 
   function handleReset() {
@@ -90,14 +68,6 @@ export default function App() {
     setProcessingError(null)
     setProcessingStatus('')
     setStyle(DEFAULT_STYLE)
-  }
-
-  // Called when user saves API key from the "no key" prompt during upload
-  function handleApiKeySaveFromUpload(key) {
-    handleApiKeySave(key)
-    if (videoFile) {
-      processVideo(videoFile, key)
-    }
   }
 
   return (
@@ -127,17 +97,6 @@ export default function App() {
           style={style}
           setStyle={setStyle}
           onReset={handleReset}
-        />
-      )}
-
-      {showApiModal && (
-        <ApiKeyModal
-          onClose={() => setShowApiModal(false)}
-          onSave={
-            step === STEPS.UPLOAD && videoFile
-              ? handleApiKeySaveFromUpload
-              : handleApiKeySave
-          }
         />
       )}
     </div>
