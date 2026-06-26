@@ -152,13 +152,15 @@ function buildDrawtextFilter(segments, style) {
 }
 
 /**
- * Convert Hebrew (RTL) text from logical order to visual order so that
- * drawtext (which always renders LTR) produces correct RTL output.
- * For pure Hebrew captions this is equivalent to reversing the string.
+ * Fix trailing punctuation placement for Hebrew (RTL) text in drawtext.
+ * text_shaping=1 handles character ordering via FriBidi, but neutral characters
+ * (period, etc.) at the end of the string can get placed on the wrong side.
+ * Inserting a Right-to-Left Mark (U+200F) before trailing punctuation forces
+ * FriBidi to treat it as part of the RTL run → renders on the left.
  */
 function toVisualOrder(text) {
   if (!/[\u0590-\u05FF]/.test(text)) return text
-  return [...text].reverse().join('')
+  return text.replace(/([.,!?;:]+\s*)$/, '\u200F$1')
 }
 
 function escapeDrawtext(text) {
