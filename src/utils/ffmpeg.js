@@ -16,13 +16,22 @@ export async function getFFmpeg() {
     wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
   })
 
-  // Load Hebrew font into WASM filesystem for subtitle rendering
-  const fontResp = await fetch('/fonts/NotoSansHebrew.ttf')
-  const fontData = await fontResp.arrayBuffer()
-  await ffmpegInstance.writeFile('/fonts/NotoSansHebrew.ttf', new Uint8Array(fontData))
-
   loaded = true
   return ffmpegInstance
+}
+
+let fontLoaded = false
+
+async function ensureFont(ffmpeg) {
+  if (fontLoaded) return
+  try {
+    const fontResp = await fetch('/fonts/NotoSansHebrew.ttf')
+    const fontData = await fontResp.arrayBuffer()
+    await ffmpeg.writeFile('/fonts/NotoSansHebrew.ttf', new Uint8Array(fontData))
+    fontLoaded = true
+  } catch (e) {
+    console.warn('Could not load Hebrew font, subtitles may not render correctly:', e)
+  }
 }
 
 /**
@@ -70,6 +79,7 @@ export async function extractAudio(videoFile, onProgress) {
  */
 export async function burnSubtitles(videoFile, srtContent, style, onProgress) {
   const ffmpeg = await getFFmpeg()
+  await ensureFont(ffmpeg)
 
   ffmpeg.on('progress', ({ progress }) => {
     if (onProgress) onProgress(Math.min(progress, 1))
