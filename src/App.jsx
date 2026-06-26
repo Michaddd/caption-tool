@@ -15,10 +15,10 @@ const DEFAULT_STYLE = {
   fontSize: 24,
   textColor: '#ffffff',
   bgColor: '#000000',
-  bgOpacity: 0.5,
+  bgOpacity: 0,
   bold: false,
   shadow: true,
-  verticalPosition: 80,
+  verticalPosition: 25,
 }
 
 export default function App() {
