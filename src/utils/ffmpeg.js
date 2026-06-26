@@ -20,17 +20,22 @@ export async function getFFmpeg() {
   return ffmpegInstance
 }
 
-let fontLoaded = false
+let fontsLoaded = false
 
 async function ensureFont(ffmpeg) {
-  if (fontLoaded) return
+  if (fontsLoaded) return
   try {
-    const fontResp = await fetch('/fonts/NotoSansHebrew.ttf')
-    if (!fontResp.ok) throw new Error(`HTTP ${fontResp.status}`)
-    const fontData = await fontResp.arrayBuffer()
     await ffmpeg.createDir('/fonts')
-    await ffmpeg.writeFile('/fonts/NotoSansHebrew.ttf', new Uint8Array(fontData))
-    fontLoaded = true
+
+    const regularResp = await fetch('/fonts/NotoSansHebrew.ttf')
+    if (!regularResp.ok) throw new Error(`HTTP ${regularResp.status}`)
+    await ffmpeg.writeFile('/fonts/NotoSansHebrew.ttf', new Uint8Array(await regularResp.arrayBuffer()))
+
+    const boldResp = await fetch('/fonts/NotoSansHebrew-Bold.ttf')
+    if (!boldResp.ok) throw new Error(`HTTP ${boldResp.status}`)
+    await ffmpeg.writeFile('/fonts/NotoSansHebrew-Bold.ttf', new Uint8Array(await boldResp.arrayBuffer()))
+
+    fontsLoaded = true
   } catch (e) {
     console.warn('Could not load Hebrew font:', e)
   }
@@ -114,14 +119,16 @@ export async function burnSubtitles(videoFile, segments, style, onProgress) {
 
 function buildDrawtextFilter(segments, style) {
   const {
-    fontSize = 18,
+    fontSize = 36,
     textColor = '#ffffff',
     bold = true,
     shadow = true,
     verticalPosition = 25,
   } = style
 
-  const fontFile = fontLoaded ? '/fonts/NotoSansHebrew.ttf' : ''
+  const fontFile = fontsLoaded
+    ? (bold ? '/fonts/NotoSansHebrew-Bold.ttf' : '/fonts/NotoSansHebrew.ttf')
+    : ''
   const color = textColor.replace('#', '0x')
   const shadowPart = shadow ? ':shadowx=2:shadowy=2:shadowcolor=0x000000@0.8' : ''
 
@@ -137,7 +144,8 @@ function buildDrawtextFilter(segments, style) {
       `x=(w-text_w)/2:` +
       `y=h*${pos.toFixed(3)}-text_h/2:` +
       `fontsize=${fontSize}:` +
-      `fontcolor=${color}` +
+      `fontcolor=${color}:` +
+      `text_shaping=1` +
       shadowPart
     )
   }).join(',')
