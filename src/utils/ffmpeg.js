@@ -16,6 +16,11 @@ export async function getFFmpeg() {
     wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
   })
 
+  // Load Hebrew font into WASM filesystem for subtitle rendering
+  const fontResp = await fetch('/fonts/NotoSansHebrew.ttf')
+  const fontData = await fontResp.arrayBuffer()
+  await ffmpegInstance.writeFile('/fonts/NotoSansHebrew.ttf', new Uint8Array(fontData))
+
   loaded = true
   return ffmpegInstance
 }
@@ -81,7 +86,7 @@ export async function burnSubtitles(videoFile, srtContent, style, onProgress) {
 
   await ffmpeg.exec([
     '-i', inputName,
-    '-vf', `subtitles=${srtName}:force_style='${forceStyle}'`,
+    '-vf', `subtitles=${srtName}:fontsdir=/fonts:force_style='${forceStyle}'`,
     '-c:a', 'copy',
     '-c:v', 'libx264',
     '-preset', 'ultrafast',
@@ -132,6 +137,7 @@ function buildForceStyle(style) {
   const marginV = Math.round((100 - verticalPosition) * 3)
 
   return [
+    `FontName=NotoSansHebrew`,
     `FontSize=${fontSize}`,
     `Bold=${boldVal}`,
     `PrimaryColour=${primaryColour}`,
