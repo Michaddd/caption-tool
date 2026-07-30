@@ -59,9 +59,12 @@ export function PreviewEditor({ videoFile, segments, setSegments, style, setStyl
     setExportProgress(0)
 
     try {
+      const previewDimensions = videoRef.current
+        ? { width: videoRef.current.offsetWidth, height: videoRef.current.offsetHeight }
+        : null
       const blob = await burnSubtitles(videoFile, segments, style, (p) => {
         setExportProgress(p)
-      })
+      }, previewDimensions)
 
       // Download
       const url = URL.createObjectURL(blob)

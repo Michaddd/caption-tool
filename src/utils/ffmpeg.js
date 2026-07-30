@@ -56,7 +56,7 @@ export async function extractAudio(videoFile, onProgress) {
  * Subtitles are rendered via browser Canvas (full Unicode RTL support),
  * then overlaid on the video using FFmpeg's overlay filter.
  */
-export async function burnSubtitles(videoFile, segments, style, onProgress) {
+export async function burnSubtitles(videoFile, segments, style, onProgress, previewDimensions) {
   const ffmpeg = await getFFmpeg()
 
   ffmpeg.on('log', ({ message }) => console.log('[FFmpeg]', message))
@@ -72,7 +72,7 @@ export async function burnSubtitles(videoFile, segments, style, onProgress) {
 
   // Render each subtitle as a transparent PNG using the browser's Canvas
   // (same rendering engine as the preview — full RTL/BiDi support)
-  const subtitleBlobs = await renderSubtitleImages(segments, style, dimensions)
+  const subtitleBlobs = await renderSubtitleImages(segments, style, dimensions, previewDimensions)
 
   // Write video to FFmpeg FS
   await ffmpeg.writeFile(inputName, await fetchFile(videoFile))
@@ -147,7 +147,24 @@ async function ensureWebFont(bold) {
   }
 }
 
-async function renderSubtitleImages(segments, style, { width, height }) {
+function wrapText(ctx, text, maxWidth) {
+  const words = text.split(' ')
+  const lines = []
+  let current = ''
+  for (const word of words) {
+    const test = current ? current + ' ' + word : word
+    if (ctx.measureText(test).width > maxWidth && current) {
+      lines.push(current)
+      current = word
+    } else {
+      current = test
+    }
+  }
+  if (current) lines.push(current)
+  return lines
+}
+
+async function renderSubtitleImages(segments, style, { width, height }, previewDimensions) {
   const {
     fontSize = 36,
     textColor = '#ffffff',
@@ -160,6 +177,12 @@ async function renderSubtitleImages(segments, style, { width, height }) {
 
   await ensureWebFont(bold)
 
+  // Scale font size from preview pixels to actual video pixels
+  const scale = previewDimensions ? width / previewDimensions.width : 1
+  const scaledFontSize = Math.round(fontSize * scale)
+  const lineHeight = scaledFontSize * 1.3
+  const maxTextWidth = width * 0.88 // matches CSS max-width: 92% with padding
+
   return Promise.all(segments.map((seg) => {
     const canvas = document.createElement('canvas')
     canvas.width = width
@@ -167,45 +190,52 @@ async function renderSubtitleImages(segments, style, { width, height }) {
     const ctx = canvas.getContext('2d')
 
     ctx.clearRect(0, 0, width, height)
-
-    const fontSpec = `${bold ? 'bold' : 'normal'} ${fontSize}px NotoSansHebrew, Arial, sans-serif`
-    ctx.font = fontSpec
+    ctx.font = `${bold ? 'bold' : 'normal'} ${scaledFontSize}px NotoSansHebrew, Arial, sans-serif`
     ctx.direction = 'rtl'
     ctx.textAlign = 'center'
 
     const x = width / 2
     const segVertPos = seg.verticalPosition ?? verticalPosition
-    const y = height * (segVertPos / 100)
+    // CSS uses top + translateY(-50%), so verticalPosition% is the center of the block
+    const blockCenterY = height * (segVertPos / 100)
+
+    const lines = wrapText(ctx, seg.text, maxTextWidth)
+    const totalBlockHeight = lines.length * lineHeight
+    // First baseline: center the block, offset up by half, then down one line's ascent
+    const firstBaselineY = blockCenterY - totalBlockHeight / 2 + scaledFontSize * 0.85
 
     // Draw background box if visible
     if (bgOpacity > 0) {
-      const metrics = ctx.measureText(seg.text)
-      const textW = metrics.width
-      const textH = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent
-      const pad = { x: 10, y: 4 }
       const clean = bgColor.replace('#', '')
       const r = parseInt(clean.substring(0, 2), 16)
       const g = parseInt(clean.substring(2, 4), 16)
       const b = parseInt(clean.substring(4, 6), 16)
+      const pad = { x: 10 * scale, y: 4 * scale }
       ctx.fillStyle = `rgba(${r},${g},${b},${bgOpacity})`
-      ctx.fillRect(
-        x - textW / 2 - pad.x,
-        y - metrics.actualBoundingBoxAscent - pad.y,
-        textW + pad.x * 2,
-        textH + pad.y * 2
-      )
+      lines.forEach((line, i) => {
+        const lineWidth = ctx.measureText(line).width
+        const lineY = firstBaselineY + i * lineHeight
+        ctx.fillRect(
+          x - lineWidth / 2 - pad.x,
+          lineY - scaledFontSize * 0.85 - pad.y,
+          lineWidth + pad.x * 2,
+          scaledFontSize + pad.y * 2
+        )
+      })
     }
 
-    // Draw shadow
+    // Draw text with shadow
     if (shadow) {
       ctx.shadowColor = 'rgba(0,0,0,0.8)'
-      ctx.shadowOffsetX = 2
-      ctx.shadowOffsetY = 2
-      ctx.shadowBlur = 3
+      ctx.shadowOffsetX = 2 * scale
+      ctx.shadowOffsetY = 2 * scale
+      ctx.shadowBlur = 3 * scale
     }
 
     ctx.fillStyle = textColor
-    ctx.fillText(seg.text, x, y)
+    lines.forEach((line, i) => {
+      ctx.fillText(line, x, firstBaselineY + i * lineHeight)
+    })
 
     return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'))
   }))
