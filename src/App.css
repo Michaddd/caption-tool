@@ -412,10 +412,38 @@ html, body, #root {
 }
 
 .subtitle-time {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.time-input {
   font-size: 11px;
   color: var(--text-muted);
-  margin-bottom: 6px;
   font-variant-numeric: tabular-nums;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 2px 4px;
+  width: 62px;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.time-input:hover {
+  border-color: var(--panel-border);
+}
+
+.time-input:focus {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.time-arrow {
+  font-size: 11px;
+  color: var(--text-muted);
 }
 
 .subtitle-item textarea {

@@ -8,10 +8,19 @@ function formatTime(seconds) {
   return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}.${ms}`
 }
 
+function parseTime(str) {
+  const match = str.trim().match(/^(\d+):(\d{2})(?:\.(\d))?$/)
+  if (!match) return null
+  const m = parseInt(match[1], 10)
+  const sec = parseInt(match[2], 10)
+  const d = match[3] ? parseInt(match[3], 10) : 0
+  return m * 60 + sec + d / 10
+}
+
 export function SubtitleList({ segments, activeId, defaultVerticalPosition, onSegmentChange, onSegmentSplit }) {
   const activeRef = useRef(null)
-  // Track cursor position per segment id
   const [cursors, setCursors] = useState({})
+  const [timeEdits, setTimeEdits] = useState({})
 
   useEffect(() => {
     if (activeRef.current) {
@@ -49,7 +58,57 @@ export function SubtitleList({ segments, activeId, defaultVerticalPosition, onSe
             className={`subtitle-item${seg.id === activeId ? ' active' : ''}`}
           >
             <div className="subtitle-time">
-              {formatTime(seg.start)} &rarr; {formatTime(seg.end)}
+              <input
+                className="time-input"
+                value={timeEdits[seg.id]?.start ?? formatTime(seg.start)}
+                onChange={(e) =>
+                  setTimeEdits((prev) => ({
+                    ...prev,
+                    [seg.id]: { ...prev[seg.id], start: e.target.value },
+                  }))
+                }
+                onBlur={(e) => {
+                  const val = parseTime(e.target.value)
+                  if (val !== null && val < seg.end) {
+                    onSegmentChange(seg.id, { ...seg, start: val })
+                  }
+                  setTimeEdits((prev) => {
+                    const next = { ...prev }
+                    if (next[seg.id]) {
+                      const { start: _, ...rest } = next[seg.id]
+                      next[seg.id] = rest
+                    }
+                    return next
+                  })
+                }}
+                onClick={(e) => e.stopPropagation()}
+              />
+              <span className="time-arrow">&rarr;</span>
+              <input
+                className="time-input"
+                value={timeEdits[seg.id]?.end ?? formatTime(seg.end)}
+                onChange={(e) =>
+                  setTimeEdits((prev) => ({
+                    ...prev,
+                    [seg.id]: { ...prev[seg.id], end: e.target.value },
+                  }))
+                }
+                onBlur={(e) => {
+                  const val = parseTime(e.target.value)
+                  if (val !== null && val > seg.start) {
+                    onSegmentChange(seg.id, { ...seg, end: val })
+                  }
+                  setTimeEdits((prev) => {
+                    const next = { ...prev }
+                    if (next[seg.id]) {
+                      const { end: _, ...rest } = next[seg.id]
+                      next[seg.id] = rest
+                    }
+                    return next
+                  })
+                }}
+                onClick={(e) => e.stopPropagation()}
+              />
             </div>
             <textarea
               value={seg.text}
