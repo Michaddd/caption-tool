@@ -490,6 +490,24 @@ html, body, #root {
   border-color: var(--accent);
 }
 
+.delete-btn {
+  background: none;
+  border: 1px solid var(--panel-border);
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 4px 10px;
+  min-height: 32px;
+  flex-shrink: 0;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.delete-btn:hover {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
 /* ── Per-segment position row ─────────────────────────── */
 .seg-position-row {
   display: flex;

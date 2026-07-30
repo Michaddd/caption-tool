@@ -36,6 +36,10 @@ export function PreviewEditor({ videoFile, segments, setSegments, style, setStyl
     setSegments((prev) => prev.map((s) => (s.id === id ? updated : s)))
   }
 
+  function handleSegmentDelete(id) {
+    setSegments((prev) => prev.filter((s) => s.id !== id))
+  }
+
   function handleSegmentSplit(id, textA, textB, midTime) {
     setSegments((prev) => {
       const idx = prev.findIndex((s) => s.id === id)
@@ -141,6 +145,7 @@ export function PreviewEditor({ videoFile, segments, setSegments, style, setStyl
               defaultVerticalPosition={style.verticalPosition}
               onSegmentChange={handleSegmentChange}
               onSegmentSplit={handleSegmentSplit}
+              onSegmentDelete={handleSegmentDelete}
             />
           ) : (
             <StyleControls style={style} onChange={setStyle} />

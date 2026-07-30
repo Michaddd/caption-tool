@@ -17,7 +17,7 @@ function parseTime(str) {
   return m * 60 + sec + d / 10
 }
 
-export function SubtitleList({ segments, activeId, defaultVerticalPosition, onSegmentChange, onSegmentSplit }) {
+export function SubtitleList({ segments, activeId, defaultVerticalPosition, onSegmentChange, onSegmentSplit, onSegmentDelete }) {
   const activeRef = useRef(null)
   const [cursors, setCursors] = useState({})
   const [timeEdits, setTimeEdits] = useState({})
@@ -153,6 +153,13 @@ export function SubtitleList({ segments, activeId, defaultVerticalPosition, onSe
                 onClick={() => handleSplit(seg)}
               >
                 Split
+              </button>
+              <button
+                className="delete-btn"
+                title="Delete caption"
+                onClick={() => onSegmentDelete(seg.id)}
+              >
+                ✕
               </button>
             </div>
           </div>
