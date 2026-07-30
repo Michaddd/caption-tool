@@ -181,7 +181,7 @@ async function renderSubtitleImages(segments, style, { width, height }, previewD
   const scale = previewDimensions ? width / previewDimensions.width : 1
   const scaledFontSize = Math.round(fontSize * scale)
   const lineHeight = scaledFontSize * 1.3
-  const maxTextWidth = width * 0.88 // matches CSS max-width: 92% with padding
+  const maxTextWidth = width * 0.90 // matches CSS max-width: 92% minus padding
 
   return Promise.all(segments.map((seg) => {
     const canvas = document.createElement('canvas')
