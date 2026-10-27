@@ -8,6 +8,8 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
+        he: resolve(__dirname, 'he/index.html'),
+        'caption-tool': resolve(__dirname, 'caption-tool/index.html'),
         'pdf-editor': resolve(__dirname, 'pdf-editor/index.html'),
       },
     },

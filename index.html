@@ -1,12 +1,151 @@
 <!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Caption Tool</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Micha Duman | Product Marketing for Tech</title>
+<meta name="description" content="Senior product marketing and heavy asset production for tech companies: how-to videos, demos, positioning, launches and sales enablement." />
+<link rel="alternate" hreflang="he" href="https://terranism.com/he/" />
+<link rel="alternate" hreflang="en" href="https://terranism.com/" />
+<style>
+  :root {
+    --bg: #faf9f6;
+    --surface: #ffffff;
+    --text: #1b1b1f;
+    --muted: #5d5d66;
+    --line: #e4e2dc;
+    --accent: #c2410c;
+    --accent-soft: #fbe9df;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141416;
+      --surface: #1d1d21;
+      --text: #f1f0ec;
+      --muted: #a3a2aa;
+      --line: #2e2e34;
+      --accent: #fb8a4c;
+      --accent-soft: #2e1f17;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 0 16px; }
+  header { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 20px 0; }
+  .name { font-weight: 700; letter-spacing: 0.02em; }
+  .lang { color: var(--text); text-decoration: none; border: 1px solid var(--line); padding: 6px 14px; border-radius: 999px; font-size: 0.9rem; }
+  .lang:hover { border-color: var(--accent); }
+  .hero { padding: 56px 0 40px; }
+  .eyebrow { color: var(--accent); font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 12px; }
+  h1 { font-size: clamp(2rem, 5vw, 3.2rem); line-height: 1.15; margin: 0 0 20px; max-width: 20ch; }
+  .lead { font-size: 1.15rem; color: var(--muted); max-width: 60ch; margin: 0 0 28px; }
+  .cta { display: inline-block; background: var(--accent); color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; }
+  @media (prefers-color-scheme: dark) { .cta { color: #141416; } }
+  section { padding: 40px 0; border-top: 1px solid var(--line); }
+  h2 { font-size: 1.5rem; margin: 0 0 24px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 22px; }
+  .card h3 { margin: 0 0 8px; font-size: 1.1rem; }
+  .card p { margin: 0; color: var(--muted); }
+  .feature { background: var(--accent-soft); border: 1px solid var(--accent); border-radius: 12px; padding: 28px; }
+  .feature h2 { margin-bottom: 12px; }
+  .feature p { margin: 0 0 16px; max-width: 65ch; }
+  .feature ul { margin: 0; padding-inline-start: 20px; display: grid; gap: 6px; }
+  .proof { display: flex; flex-wrap: wrap; gap: 10px; margin: 0; padding: 0; list-style: none; }
+  .proof li { background: var(--accent-soft); border-radius: 999px; padding: 6px 14px; font-size: 0.95rem; }
+  .steps { counter-reset: s; list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; }
+  .steps li { counter-increment: s; padding-inline-start: 44px; position: relative; }
+  .steps li::before { content: counter(s); position: absolute; inset-inline-start: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; font-weight: 700; }
+  .steps strong { display: block; }
+  .steps span { color: var(--muted); }
+  footer { padding: 40px 0 56px; border-top: 1px solid var(--line); }
+  footer a { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="name">Micha Duman</span>
+    <a class="lang" href="/he/" hreflang="he" lang="he">עברית: שיווק לעסקים</a>
+  </header>
+
+  <div class="hero">
+    <p class="eyebrow">Product marketing for tech companies</p>
+    <h1>Your engineers get it. Your buyers don't. I close that gap.</h1>
+    <p class="lead">Senior product marketing plus the heavy asset production most marketers hand off: how-to videos, demos, decks and technical content. One senior person, small-team output.</p>
+    <a class="cta" href="mailto:michidu@gmail.com?subject=Product%20marketing">Email me for a 20-minute intro</a>
+  </div>
+
+  <section>
+    <div class="feature">
+      <h2>How-to and product videos</h2>
+      <p>Most products are explained badly, or not at all. I produce video that shows people how your product works and why it matters, written by someone who understands the product, not just the camera.</p>
+      <ul>
+        <li>Tutorials, feature walkthroughs and onboarding series</li>
+        <li>Demo and launch videos</li>
+        <li>Concept, script, screen capture, voiceover, edit and motion, all in-house</li>
+        <li>Kept up to date as your product changes</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>Product marketing</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>Positioning and messaging</h3>
+        <p>Research-backed value proposition, messaging framework and persona variants, from developers to executives. Know what to say, to whom, and why you are different.</p>
+      </div>
+      <div class="card">
+        <h3>Go-to-market and launches</h3>
+        <p>GTM plans for new products, features and verticals. Launch messaging, assets and internal alignment so the whole company tells one story.</p>
+      </div>
+      <div class="card">
+        <h3>Sales enablement</h3>
+        <p>Sales decks, one-pagers, battlecards and ROI narratives that salespeople actually use in the room.</p>
+      </div>
+      <div class="card">
+        <h3>Technical content and copy</h3>
+        <p>Website and landing pages, blogs, case studies and explainers. Accurate enough for engineers, clear enough for buyers.</p>
+      </div>
+      <div class="card">
+        <h3>AI content systems</h3>
+        <p>AI-assisted workflows for research, content and video, so your team produces more without losing quality.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Experience</h2>
+    <p class="lead">7+ years marketing developer, infrastructure and AI products. Native English and Hebrew.</p>
+    <ul class="proof">
+      <li>Senior PMM, Coralogix</li>
+      <li>Senior PMM, IncrediBuild</li>
+      <li>PMM, Wix</li>
+      <li>Marketer of the Year, IncrediBuild</li>
+      <li>Co-founder, RedBand (TV and live show)</li>
+      <li>BFA Film and Television, Tel Aviv University</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>How it works</h2>
+    <ol class="steps">
+      <li><strong>Intro call</strong><span>We talk about your product, your market and what is not landing yet.</span></li>
+      <li><strong>Scoped project or monthly retainer</strong><span>A fixed deliverable, like a video series or a launch, or ongoing fractional product marketing.</span></li>
+      <li><strong>Finished work</strong><span>You get the strategy and the finished assets, not a deck of recommendations.</span></li>
+    </ol>
+  </section>
+
+  <footer>
+    <p><strong>Get in touch:</strong> <a href="mailto:michidu@gmail.com">michidu@gmail.com</a> · <a href="https://www.linkedin.com/in/micha-duman-53409a123/">LinkedIn</a></p>
+  </footer>
+</div>
+</body>
 </html>
